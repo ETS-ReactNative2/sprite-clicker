@@ -13,14 +13,14 @@ aside, section {
 }
 
 section {
-  border: solid grey;
+  border: solid #757575;
   border-width: 0 1px;
 }
 
 button {
   cursor: pointer;
   font-size: 20px;
-  background: none;
+  background: white;
   border: 2px solid black;
   padding: 8px;
   margin: 8px 0;
