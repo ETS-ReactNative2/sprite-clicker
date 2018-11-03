@@ -8,16 +8,34 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      activeSprite: 0,
+      sprites: [
+        randomSprite(),
+      ],
       beans: 100,
       beansPerBoop: 1,
-      // TODO: Replace boopsPerSecond with number of sprites.
-      boopsPerSecond: 0,
       candidate: randomSprite(),
     };
 
     this.clickForBeans = this.clickForBeans.bind(this);
     this.upgradeBoops = this.upgradeBoops.bind(this);
     this.dismissCandidate = this.dismissCandidate.bind(this);
+    this.recruitCandidate = this.recruitCandidate.bind(this);
+    this.timerLoop = this.timerLoop.bind(this);
+  }
+
+  componentDidMount() {
+    this.timer = window.setInterval(this.timerLoop, 1000);
+  }
+
+  componentWillUnmount() {
+    window.clearInterval(this.timer);
+  }
+
+  timerLoop() {
+    this.setState({
+      beans: this.state.beans + this.getBeansPerSecond(),
+    });
   }
 
   upgradeBoops() {
@@ -42,20 +60,42 @@ class App extends Component {
     });
   }
 
+  recruitCandidate() {
+    const cost = this.getRecruitCandidateCost();
+    if (cost > this.state.beans) return;
+    this.setState({
+      sprites: this.state.sprites.concat([this.state.candidate]),
+      candidate: randomSprite(),
+      beans: this.state.beans - cost,
+    });
+  }
+
+  getActiveSprite() {
+    if (this.state.activeSprite in this.state.sprites) {
+      return this.state.sprites[this.state.activeSprite];
+    }
+    return {};
+  }
+
   getTreatCost() {
     return 100 * this.state.beansPerBoop;
   }
 
+  getRecruitCandidateCost() {
+    return 100 * this.state.sprites.length;
+  }
+
   getDismissCandidateCost() {
-    return 5;
+    return 5 * this.state.sprites.length;
   }
 
   getBeansPerSecond() {
-    return this.state.boopsPerSecond * this.state.beansPerBoop;
+    return (this.state.sprites.length - 1) * this.state.beansPerBoop;
   }
 
   render() {
     const candidate = this.state.candidate;
+    const activeSprite = this.getActiveSprite();
     return (
       <main>
         <aside>
@@ -82,12 +122,11 @@ class App extends Component {
           </button>
         </aside>
         <section>
-
           <h2>
-            Arky the Arko
+            {`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
           </h2>
           <h3>
-            Arky patiently waits for you to pet him.
+            {activeSprite.name} patiently waits for you to pet him.
           </h3>
           <img
             className="click-floater"
@@ -100,9 +139,9 @@ class App extends Component {
             onClick={this.clickForBeans}
           >
             <img
-              src="/img/sprites/arko/saylian.png"
-              alt="Arky the Arko"
-              title="Arky the Arko"
+              src={`/img/sprites/${activeSprite.species}/${activeSprite.variant}.png`}
+              alt={`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
+              title={`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
             />
           </button>
         </section>
@@ -113,13 +152,14 @@ class App extends Component {
           <img
             className='candidate'
             src={`/img/sprites/${candidate.species}/${candidate.variant}.png`}
-            alt={`${candidate.variant} ${candidate.species}`}
+            alt={`${candidate.name} the ${candidate.variant} ${candidate.species}`}
+            title={`${candidate.name} the ${candidate.variant} ${candidate.species}`}
           />
           <figcaption>
             {`${candidate.name} the ${candidate.variant} ${candidate.species}`}
           </figcaption>
-          <button>
-            {`Recruit ${candidate.name} for 100 Beans.`}
+          <button onClick={this.recruitCandidate}>
+            {`Recruit ${candidate.name} for ${this.getRecruitCandidateCost()} Beans.`}
           </button>
           <button onClick={this.dismissCandidate}>
             {`Dismiss ${candidate.name} for ${this.getDismissCandidateCost()} Beans.`}
