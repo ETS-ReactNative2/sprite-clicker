@@ -20,4 +20,13 @@ section {
 .active-sprite {
   max-width: 100%;
   cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.active-sprite:hover {
+  transform: scale(1.02);
+}
+
+.active-sprite:active {
+  transform: translateY(5%);
 }
