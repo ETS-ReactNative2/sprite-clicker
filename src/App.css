@@ -17,10 +17,20 @@ section {
   border-width: 0 1px;
 }
 
+button {
+  cursor: pointer;
+  font-size: 20px;
+  background: none;
+  border: 2px solid black;
+  padding: 8px;
+  margin: 8px 0;
+}
+
 .active-sprite {
   max-width: 100%;
-  cursor: pointer;
   transition: transform 0.2s;
+  border: 0;
+  background: none;
 }
 
 .active-sprite:hover {
@@ -29,4 +39,22 @@ section {
 
 .active-sprite:active {
   transform: translateY(5%);
+}
+
+.item-info {
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.item-info img {
+  margin: 8px;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.click-floater {
+  position: absolute;
+  display: none;
 }
