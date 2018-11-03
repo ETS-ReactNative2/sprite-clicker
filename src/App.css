@@ -3,8 +3,21 @@ main {
   text-align: center;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
+  height: 100%;
+  padding: 10px;
 }
 
 aside, section {
-  padding: 20px;
+  padding: 10px;
+  height: 100%;
+}
+
+section {
+  border: solid grey;
+  border-width: 0 1px;
+}
+
+.active-sprite {
+  max-width: 100%;
+  cursor: pointer;
 }
