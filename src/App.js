@@ -3,21 +3,24 @@ import React, { Component } from 'react';
 import './App.css';
 import { randomSprite } from './spriteHelper';
 import { capitalizeFirst, randomChoice, randomInt } from './utils';
+const FREQUENCY = 2; // seconds
 
 class App extends Component {
   constructor(props) {
     super(props);
+    const newSprite = randomSprite();
     this.state = {
       activeSprite: 0,
       sprites: [
-        randomSprite(),
+        newSprite,
       ],
-      beans: 100,
-      beansPerBoop: 1,
+      boops: 100,
+      boopsPerBoop: 1,
       candidate: randomSprite(),
+      statusText: `${newSprite.name} patiently awaits your boops.`
     };
 
-    this.clickForBeans = this.clickForBeans.bind(this);
+    this.clickForBoops = this.clickForBoops.bind(this);
     this.upgradeBoops = this.upgradeBoops.bind(this);
     this.dismissCandidate = this.dismissCandidate.bind(this);
     this.recruitCandidate = this.recruitCandidate.bind(this);
@@ -25,7 +28,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.timer = window.setInterval(this.timerLoop, 2000);
+    this.timer = window.setInterval(this.timerLoop, FREQUENCY * 1000);
   }
 
   componentWillUnmount() {
@@ -44,10 +47,11 @@ class App extends Component {
       this.setState({ sprites: currentSprites });
       setTimeout(() => {
         currentSprites[booper].position = Math.random();
-        currentSprites[activeSprite].topOffset = 5;
+        currentSprites[activeSprite].topOffset = 2.5;
         this.setState({
           sprites: currentSprites,
-          beans: this.state.beans + this.getBeansPerSecond(),
+          boops: this.state.boops + this.state.boopsPerBoop,
+          statusText: `${currentSprites[booper].name} booped ${currentSprites[activeSprite].name}!`
         });
         setTimeout(() => {
           currentSprites[activeSprite].topOffset = 0;
@@ -55,39 +59,39 @@ class App extends Component {
             sprites: currentSprites,
           });
         }, 200);
-      }, 1000);
+      }, FREQUENCY * 500);
     }
   }
 
   upgradeBoops() {
     const cost = this.getTreatCost();
-    if (cost > this.state.beans) return;
+    if (cost > this.state.boops) return;
     this.setState({
-      beansPerBoop: this.state.beansPerBoop + 1,
-      beans: this.state.beans - cost,
+      boopsPerBoop: this.state.boopsPerBoop + 1,
+      boops: this.state.boops - cost,
     });
   }
 
-  clickForBeans() {
-    this.setState({beans: this.state.beans + this.state.beansPerBoop});
+  clickForBoops() {
+    this.setState({boops: this.state.boops + this.state.boopsPerBoop});
   }
 
   dismissCandidate() {
     const cost = this.getDismissCandidateCost();
-    if (cost > this.state.beans) return;
+    if (cost > this.state.boops) return;
     this.setState({
       candidate: randomSprite(),
-      beans: this.state.beans - cost,
+      boops: this.state.boops - cost,
     });
   }
 
   recruitCandidate() {
     const cost = this.getRecruitCandidateCost();
-    if (cost > this.state.beans) return;
+    if (cost > this.state.boops) return;
     this.setState({
       sprites: this.state.sprites.concat([this.state.candidate]),
       candidate: randomSprite(),
-      beans: this.state.beans - cost,
+      boops: this.state.boops - cost,
     });
   }
 
@@ -99,7 +103,7 @@ class App extends Component {
   }
 
   getTreatCost() {
-    return 50 * this.state.beansPerBoop;
+    return 50 * this.state.boopsPerBoop;
   }
 
   getRecruitCandidateCost() {
@@ -110,8 +114,8 @@ class App extends Component {
     return 3 * this.state.sprites.length;
   }
 
-  getBeansPerSecond() {
-    return (this.state.sprites.length - 1) * this.state.beansPerBoop;
+  getBoopsPerSecond() {
+    return (((this.state.sprites.length - 1) * this.state.boopsPerBoop) / 2);
   }
 
   render() {
@@ -125,25 +129,25 @@ class App extends Component {
       <main>
         <aside>
           <h2>
-            { this.state.beans } beans
+            { this.state.boops } boops
           </h2>
           <h3>
-            { this.getBeansPerSecond() / 2 } Beans per second
+            { this.getBoopsPerSecond() } Boops per second
           </h3>
 
           <div className="item-info">
             <img src="/img/items/treat/mushroom.png" alt="Treat" title="Treat" />
             <div>
               <h4>Magic Treat</h4>
-              You own: { this.state.beansPerBoop }
+              You own: { this.state.boopsPerBoop }
               <p>
                 Magic treats make your sprites more efficient at collecting
-                magic beans.
+                magic boops.
               </p>
             </div>
           </div>
           <button onClick={ this.upgradeBoops }>
-            Buy Magic Treat for { this.getTreatCost() } beans
+            Buy Magic Treat for { this.getTreatCost() } boops
           </button>
         </aside>
         <section className="click-area">
@@ -152,7 +156,7 @@ class App extends Component {
             {`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
           </h2>
           <h3>
-            {activeSprite.name} patiently waits for you to pet him.
+            {this.state.statusText}
           </h3>
           <img
             className="click-floater"
@@ -162,7 +166,7 @@ class App extends Component {
           />
           <button
             className="active-sprite"
-            onClick={this.clickForBeans}
+            onClick={this.clickForBoops}
           >
             <img
               src={`/img/sprites/${activeSprite.species}/${activeSprite.variant}.png`}
@@ -188,10 +192,10 @@ class App extends Component {
             {`${candidate.name} the ${candidate.variant} ${candidate.species}`}
           </figcaption>
           <button onClick={this.recruitCandidate}>
-            {`Recruit ${candidate.name} for ${this.getRecruitCandidateCost()} Beans.`}
+            {`Recruit ${candidate.name} for ${this.getRecruitCandidateCost()} Boops.`}
           </button>
           <button onClick={this.dismissCandidate}>
-            {`Dismiss ${candidate.name} for ${this.getDismissCandidateCost()} Beans.`}
+            {`Dismiss ${candidate.name} for ${this.getDismissCandidateCost()} Boops.`}
           </button>
         </aside>
       </main>
