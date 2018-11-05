@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import { randomSprite } from './spriteHelper';
-import { capitalizeFirst } from './utils';
+import { capitalizeFirst, randomChoice, randomInt } from './utils';
 
 class App extends Component {
   constructor(props) {
@@ -25,7 +25,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.timer = window.setInterval(this.timerLoop, 1000);
+    this.timer = window.setInterval(this.timerLoop, 2000);
   }
 
   componentWillUnmount() {
@@ -33,9 +33,30 @@ class App extends Component {
   }
 
   timerLoop() {
-    this.setState({
-      beans: this.state.beans + this.getBeansPerSecond(),
-    });
+    if (this.state.sprites.length > 1) {
+      let booper = randomInt(this.state.sprites.length - 1);
+      let activeSprite = this.state.activeSprite;
+      while (booper === activeSprite) {
+        booper = randomInt(this.state.sprites.length - 1);
+      }
+      const currentSprites = this.state.sprites.slice();
+      currentSprites[booper].position = 2;
+      this.setState({ sprites: currentSprites });
+      setTimeout(() => {
+        currentSprites[booper].position = Math.random();
+        currentSprites[activeSprite].topOffset = 5;
+        this.setState({
+          sprites: currentSprites,
+          beans: this.state.beans + this.getBeansPerSecond(),
+        });
+        setTimeout(() => {
+          currentSprites[activeSprite].topOffset = 0;
+          this.setState({
+            sprites: currentSprites,
+          });
+        }, 200);
+      }, 1000);
+    }
   }
 
   upgradeBoops() {
@@ -78,15 +99,15 @@ class App extends Component {
   }
 
   getTreatCost() {
-    return 100 * this.state.beansPerBoop;
+    return 50 * this.state.beansPerBoop;
   }
 
   getRecruitCandidateCost() {
-    return 100 * this.state.sprites.length;
+    return 50 * this.state.sprites.length;
   }
 
   getDismissCandidateCost() {
-    return 5 * this.state.sprites.length;
+    return 3 * this.state.sprites.length;
   }
 
   getBeansPerSecond() {
@@ -96,6 +117,10 @@ class App extends Component {
   render() {
     const candidate = this.state.candidate;
     const activeSprite = this.getActiveSprite();
+    const helpers = this.state.sprites.map((helper) => (<HelperPortrait
+      sprite={helper}
+      key={helper.name}
+    />));
     return (
       <main>
         <aside>
@@ -103,7 +128,7 @@ class App extends Component {
             { this.state.beans } beans
           </h2>
           <h3>
-            { this.getBeansPerSecond() } Beans per second
+            { this.getBeansPerSecond() / 2 } Beans per second
           </h3>
 
           <div className="item-info">
@@ -121,7 +146,8 @@ class App extends Component {
             Buy Magic Treat for { this.getTreatCost() } beans
           </button>
         </aside>
-        <section>
+        <section className="click-area">
+          {helpers}
           <h2>
             {`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
           </h2>
@@ -142,6 +168,9 @@ class App extends Component {
               src={`/img/sprites/${activeSprite.species}/${activeSprite.variant}.png`}
               alt={`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
               title={`${activeSprite.name} the ${activeSprite.variant} ${activeSprite.species}`}
+              style={{
+                transform: `translateY(${activeSprite.topOffset}%)`,
+              }}
             />
           </button>
         </section>
@@ -168,6 +197,36 @@ class App extends Component {
       </main>
     );
   }
+}
+
+function HelperPortrait(props) {
+  let x = '';
+  let y = '';
+  if (props.sprite.position < 0.25) {
+    x = `calc(0% - 350px)`;
+    y = `calc(${props.sprite.position * 200}% - 350px)`;
+  } else if (props.sprite.position < 0.5) {
+    x = `calc((${(props.sprite.position * 400) - 100}% - 350px)`;
+    y = `calc(0% - 350px)`;
+  } else if (props.sprite.position <= 1){
+    x = `100%`;
+    y = `calc(${(props.sprite.position * 200) - 150}% - 350px)`;
+  } else {
+    x = `calc(50% - 350px)`;
+    y = `calc(50% - 175px)`;
+  }
+  return (
+    <img
+      className='helper-portrait'
+      src={`/img/sprites/${props.sprite.species}/${props.sprite.variant}.png`}
+      alt={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
+      title={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
+      style={{
+        left: x,
+        bottom: y,
+      }}
+    />
+  );
 }
 
 export default App;

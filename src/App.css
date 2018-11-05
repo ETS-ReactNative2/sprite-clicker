@@ -58,3 +58,18 @@ button {
   position: absolute;
   display: none;
 }
+
+.candidate {
+  width: 60%;
+}
+
+.click-area {
+  position: relative;
+  overflow: hidden;
+}
+
+.helper-portrait {
+  position: absolute;
+  transition: left 1.5s, bottom 1.5s;
+  transition-timing-function: ease;
+}

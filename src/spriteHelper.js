@@ -9,6 +9,8 @@ export function randomSprite() {
     name: capitalizeFirst(soulName()),
     species: species,
     variant: variant,
+    position: Math.random(),
+    topOffset: 0,
   }
   return sprite;
 }
