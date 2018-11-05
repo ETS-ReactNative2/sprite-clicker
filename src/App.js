@@ -1,6 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import './App.css';
+import HelperPortrait from './HelperPortrait';
 import { randomSprite } from './spriteHelper';
 import { capitalizeFirst, randomChoice, randomInt } from './utils';
 const FREQUENCY = 2; // seconds
@@ -50,7 +51,7 @@ class App extends Component {
         currentSprites[activeSprite].topOffset = 2.5;
         this.setState({
           sprites: currentSprites,
-          boops: this.state.boops + this.state.boopsPerBoop,
+          boops: this.state.boops + (this.state.boopsPerBoop * (this.state.sprites.length - 1)),
           statusText: `${currentSprites[booper].name} booped ${currentSprites[activeSprite].name}!`
         });
         setTimeout(() => {
@@ -73,7 +74,10 @@ class App extends Component {
   }
 
   clickForBoops() {
-    this.setState({boops: this.state.boops + this.state.boopsPerBoop});
+    this.setState({
+      boops: this.state.boops + this.state.boopsPerBoop,
+      statusText: `You gave ${this.getActiveSprite().name} a boop!`,
+    });
   }
 
   dismissCandidate() {
@@ -115,7 +119,7 @@ class App extends Component {
   }
 
   getBoopsPerSecond() {
-    return (((this.state.sprites.length - 1) * this.state.boopsPerBoop) / 2);
+    return (((this.state.sprites.length - 1) * this.state.boopsPerBoop) / FREQUENCY);
   }
 
   render() {
@@ -201,36 +205,6 @@ class App extends Component {
       </main>
     );
   }
-}
-
-function HelperPortrait(props) {
-  let x = '';
-  let y = '';
-  if (props.sprite.position < 0.25) {
-    x = `calc(0% - 350px)`;
-    y = `calc(${props.sprite.position * 200}% - 350px)`;
-  } else if (props.sprite.position < 0.5) {
-    x = `calc((${(props.sprite.position * 400) - 100}% - 350px)`;
-    y = `calc(0% - 350px)`;
-  } else if (props.sprite.position <= 1){
-    x = `100%`;
-    y = `calc(${(props.sprite.position * 200) - 150}% - 350px)`;
-  } else {
-    x = `calc(50% - 350px)`;
-    y = `calc(50% - 175px)`;
-  }
-  return (
-    <img
-      className='helper-portrait'
-      src={`/img/sprites/${props.sprite.species}/${props.sprite.variant}.png`}
-      alt={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
-      title={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
-      style={{
-        left: x,
-        bottom: y,
-      }}
-    />
-  );
 }
 
 export default App;
