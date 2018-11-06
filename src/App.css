@@ -79,6 +79,11 @@ button {
   flex-direction: row;
 }
 
+.den button, .den-top button {
+  background: 0;
+  border: 0;
+}
+
 .den-portrait {
   text-align: center;
   cursor: pointer;

@@ -159,11 +159,13 @@ class App extends Component {
       <main>
         <ReactModal
           isOpen={this.state.showModal}
-          contentLabel="Minimal Modal Example"
+          contentLabel='Minimal Modal Example'
         >
           <div className='den-top'>
             <button onClick={this.handleCloseModal}>X</button>
-            <h2 className='den-title'>Pick a sprite to boop</h2>
+            <h2 className='den-title'>
+              Pick a sprite to boop
+            </h2>
           </div>
           <div className='den'>
             {denPortraits}
@@ -190,9 +192,6 @@ class App extends Component {
           </div>
           <button onClick={ this.upgradeBoops }>
             Buy Magic Treat for { this.getTreatCost() } beans
-          </button>
-          <button onClick={ this.handleOpenModal }>
-            Boop a different sprite
           </button>
         </aside>
         <section className="click-area">
@@ -222,6 +221,9 @@ class App extends Component {
               }}
             />
           </button>
+          <br /><button onClick={ this.handleOpenModal }>
+            Play with another sprite
+          </button>
         </section>
         <aside>
           <h2>
@@ -250,7 +252,7 @@ class App extends Component {
 
 function DenPortrait(props) {
   return (
-    <div
+    <button
       className="den-portrait"
       onClick={props.onClick}
     >
@@ -262,7 +264,7 @@ function DenPortrait(props) {
       <figcaption>
         {`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
       </figcaption>
-    </div>
+    </button>
   );
 }
 
