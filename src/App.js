@@ -1,10 +1,11 @@
 // @flow
 import React, { Component } from 'react';
+import ReactModal from 'react-modal';
 import './App.css';
 import HelperPortrait from './HelperPortrait';
 import { randomSprite } from './spriteHelper';
 import { capitalizeFirst, randomChoice, randomInt } from './utils';
-const FREQUENCY = 2; // seconds
+const FREQUENCY = 8; // seconds
 
 class App extends Component {
   constructor(props) {
@@ -15,17 +16,21 @@ class App extends Component {
       sprites: [
         newSprite,
       ],
-      boops: 100,
-      boopsPerBoop: 1,
+      beans: 100,
+      beansPerBoop: 1,
       candidate: randomSprite(),
-      statusText: `${newSprite.name} patiently awaits your boops.`
+      statusText: `${newSprite.name} patiently awaits your boops.`,
+      showModal: false,
     };
 
-    this.clickForBoops = this.clickForBoops.bind(this);
+    this.clickForBeans = this.clickForBeans.bind(this);
     this.upgradeBoops = this.upgradeBoops.bind(this);
     this.dismissCandidate = this.dismissCandidate.bind(this);
     this.recruitCandidate = this.recruitCandidate.bind(this);
     this.timerLoop = this.timerLoop.bind(this);
+    this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.setActiveSprite = this.setActiveSprite.bind(this);
   }
 
   componentDidMount() {
@@ -51,7 +56,7 @@ class App extends Component {
         currentSprites[activeSprite].topOffset = 2.5;
         this.setState({
           sprites: currentSprites,
-          boops: this.state.boops + (this.state.boopsPerBoop * (this.state.sprites.length - 1)),
+          beans: this.state.beans + (this.state.beansPerBoop * (this.state.sprites.length - 1)),
           statusText: `${currentSprites[booper].name} booped ${currentSprites[activeSprite].name}!`
         });
         setTimeout(() => {
@@ -66,36 +71,36 @@ class App extends Component {
 
   upgradeBoops() {
     const cost = this.getTreatCost();
-    if (cost > this.state.boops) return;
+    if (cost > this.state.beans) return;
     this.setState({
-      boopsPerBoop: this.state.boopsPerBoop + 1,
-      boops: this.state.boops - cost,
+      beansPerBoop: this.state.beansPerBoop + 1,
+      beans: this.state.beans - cost,
     });
   }
 
-  clickForBoops() {
+  clickForBeans() {
     this.setState({
-      boops: this.state.boops + this.state.boopsPerBoop,
+      beans: this.state.beans + this.state.beansPerBoop,
       statusText: `You gave ${this.getActiveSprite().name} a boop!`,
     });
   }
 
   dismissCandidate() {
     const cost = this.getDismissCandidateCost();
-    if (cost > this.state.boops) return;
+    if (cost > this.state.beans) return;
     this.setState({
       candidate: randomSprite(),
-      boops: this.state.boops - cost,
+      beans: this.state.beans - cost,
     });
   }
 
   recruitCandidate() {
     const cost = this.getRecruitCandidateCost();
-    if (cost > this.state.boops) return;
+    if (cost > this.state.beans) return;
     this.setState({
       sprites: this.state.sprites.concat([this.state.candidate]),
       candidate: randomSprite(),
-      boops: this.state.boops - cost,
+      beans: this.state.beans - cost,
     });
   }
 
@@ -106,8 +111,12 @@ class App extends Component {
     return {};
   }
 
+  setActiveSprite(index) {
+    this.setState({ activeSprite: index });
+  }
+
   getTreatCost() {
-    return 50 * this.state.boopsPerBoop;
+    return 50 * this.state.beansPerBoop;
   }
 
   getRecruitCandidateCost() {
@@ -118,8 +127,16 @@ class App extends Component {
     return 3 * this.state.sprites.length;
   }
 
-  getBoopsPerSecond() {
-    return (((this.state.sprites.length - 1) * this.state.boopsPerBoop) / FREQUENCY);
+  getBeansPerSecond() {
+    return (((this.state.sprites.length - 1) * this.state.beansPerBoop) / FREQUENCY);
+  }
+
+  handleOpenModal() {
+    this.setState({ showModal: true });
+  }
+
+  handleCloseModal() {
+    this.setState({ showModal: false });
   }
 
   render() {
@@ -129,29 +146,53 @@ class App extends Component {
       sprite={helper}
       key={helper.name}
     />));
+    const denPortraits = this.state.sprites.map((sprite, index) => (<DenPortrait
+      sprite={sprite}
+      index={index}
+      key={`Den ${sprite.name}`}
+      onClick={() => {
+        this.setActiveSprite(index);
+        this.handleCloseModal();
+      }}
+    />));
     return (
       <main>
+        <ReactModal
+          isOpen={this.state.showModal}
+          contentLabel="Minimal Modal Example"
+        >
+          <div className='den-top'>
+            <button onClick={this.handleCloseModal}>X</button>
+            <h2 className='den-title'>Pick a sprite to boop</h2>
+          </div>
+          <div className='den'>
+            {denPortraits}
+          </div>
+        </ReactModal>
         <aside>
           <h2>
-            { this.state.boops } boops
+            { this.state.beans } beans
           </h2>
           <h3>
-            { this.getBoopsPerSecond() } Boops per second
+            { this.getBeansPerSecond() } Beans per second
           </h3>
 
           <div className="item-info">
             <img src="/img/items/treat/mushroom.png" alt="Treat" title="Treat" />
             <div>
               <h4>Magic Treat</h4>
-              You own: { this.state.boopsPerBoop }
+              You own: { this.state.beansPerBoop }
               <p>
                 Magic treats make your sprites more efficient at collecting
-                magic boops.
+                magic beans.
               </p>
             </div>
           </div>
           <button onClick={ this.upgradeBoops }>
-            Buy Magic Treat for { this.getTreatCost() } boops
+            Buy Magic Treat for { this.getTreatCost() } beans
+          </button>
+          <button onClick={ this.handleOpenModal }>
+            Boop a different sprite
           </button>
         </aside>
         <section className="click-area">
@@ -170,7 +211,7 @@ class App extends Component {
           />
           <button
             className="active-sprite"
-            onClick={this.clickForBoops}
+            onClick={this.clickForBeans}
           >
             <img
               src={`/img/sprites/${activeSprite.species}/${activeSprite.variant}.png`}
@@ -196,15 +237,33 @@ class App extends Component {
             {`${candidate.name} the ${candidate.variant} ${candidate.species}`}
           </figcaption>
           <button onClick={this.recruitCandidate}>
-            {`Recruit ${candidate.name} for ${this.getRecruitCandidateCost()} Boops.`}
+            {`Recruit ${candidate.name} for ${this.getRecruitCandidateCost()} Beans.`}
           </button>
           <button onClick={this.dismissCandidate}>
-            {`Dismiss ${candidate.name} for ${this.getDismissCandidateCost()} Boops.`}
+            {`Dismiss ${candidate.name} for ${this.getDismissCandidateCost()} Beans.`}
           </button>
         </aside>
       </main>
     );
   }
+}
+
+function DenPortrait(props) {
+  return (
+    <div
+      className="den-portrait"
+      onClick={props.onClick}
+    >
+      <img
+        src={`/img/sprites/${props.sprite.species}/${props.sprite.variant}.png`}
+        alt={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
+        title={`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
+      />
+      <figcaption>
+        {`${props.sprite.name} the ${props.sprite.variant} ${props.sprite.species}`}
+      </figcaption>
+    </div>
+  );
 }
 
 export default App;

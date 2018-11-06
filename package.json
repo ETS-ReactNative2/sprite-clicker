@@ -6,6 +6,7 @@
     "flow-bin": "^0.84.0",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
+    "react-modal": "^3.6.1",
     "react-scripts": "2.0.5"
   },
   "scripts": {
